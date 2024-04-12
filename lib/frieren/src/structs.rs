@@ -29,7 +29,7 @@ pub struct FileHeader {
 	/// making an enum for it.
 	pub instruction_set: u16,
 	/// The version of this ELF file - should be 1 for the current version.
-	pub elf_version: u8,
+	pub elf_version: u32,
 	/// An offset to the entry point of this ELF file.
 	pub entry_point: u64,
 	/// An offset to the program header table of this ELF file.
