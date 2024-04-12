@@ -1,4 +1,7 @@
-#![no_std]
+#![cfg_attr(not(test), no_std)]
+
+#[cfg(test)]
+mod tests;
 
 pub mod structs;
 pub use structs::*;
@@ -6,9 +9,11 @@ pub use structs::*;
 use core::mem;
 
 /// Frieren failed to cast a spell
+#[derive(Debug)]
 pub enum ElfError {
 	/// Couldn't find the magic bytes in the ELF file
-	NoMagicBytes,
+	/// Contains the bytes found
+	NoMagicBytes([u8; 4]),
 	/// ELF is 32-bit, not 64-bit
 	/// TODO: There's probably a way to use 32-bit compat...
 	Bitness32,
@@ -24,6 +29,7 @@ pub enum ElfError {
 	BadHeaderSize(Header),
 }
 
+#[derive(Debug)]
 pub enum Header {
 	Section,
 	Program,
@@ -40,7 +46,7 @@ impl FileHeader {
 		let header = unsafe { &*ptr };
 
 		Err(if header.magic_bytes != [0x7F, 0x45, 0x4C, 0x46] {
-			ElfError::NoMagicBytes
+			ElfError::NoMagicBytes(header.magic_bytes)
 		} else if header.bitness != Bitness::X64 {
 			ElfError::Bitness32
 		} else if header.endianess != Endianess::NATIVE {
