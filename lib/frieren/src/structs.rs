@@ -55,7 +55,7 @@ pub struct FileHeader {
 
 /// Each program header describes a segment of an ELF file. These are only needed for executables
 /// and shared objects. A segment contains one or more sections.
-#[repr(packed)]
+#[repr(C, packed)]
 pub struct ProgramHeader {
 	/// Defines the type for this segment.
 	pub program_type: ProgramType,
