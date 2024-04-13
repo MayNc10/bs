@@ -6,7 +6,7 @@ mod tests;
 pub mod structs;
 pub use structs::*;
 
-use core::mem;
+use core::{mem, ptr};
 
 /// Frieren failed to cast a spell
 #[derive(Debug)]
@@ -72,6 +72,28 @@ impl FileHeader {
 		let len = mem::size_of::<SectionHeader>() * self.section_table_entries as usize;
 
 		(start, start + len)
+	}
+}
+
+impl ProgramHeader {
+	pub unsafe fn from_ptr<'a>(ptr: *const u8) -> ProgramHeader {
+		let mut object = ProgramHeader::default();
+		object = unsafe { *(ptr as *const ProgramHeader) };
+
+		// Fix broken enum
+		let enum_val = object.program_type as u32;
+		
+		object.program_type = match enum_val {
+			0x60_000_000..=0x6F_FFF_FFF => {
+				ProgramType::OsSpecific
+			},
+			0x70_000_000..=0x7F_FFF_FFF => {
+				ProgramType::ProcessorSpecific
+			}
+			_ => unsafe { mem::transmute(enum_val) }
+		};
+		
+		object
 	}
 }
 

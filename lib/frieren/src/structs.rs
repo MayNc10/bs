@@ -1,5 +1,8 @@
-//! This defines tructures in ELF files. This includes the file header, program header, and section header.
+//! This defines structures in ELF files. This includes the file header, program header, and section header.
 //! This also defines several enums present in those headers.
+
+#[cfg(test)] 
+use derivative::*;
 
 /// The first few bytes of an ELF file. Contains general file information. Note that this structure
 /// looks somewhat different for 32-bit ELFs.
@@ -56,6 +59,9 @@ pub struct FileHeader {
 /// Each program header describes a segment of an ELF file. These are only needed for executables
 /// and shared objects. A segment contains one or more sections.
 #[repr(C, packed)]
+#[cfg_attr(test, derive(Derivative))]
+#[cfg_attr(test, derivative(Debug))]
+#[derive(Clone, Copy, Default)]
 pub struct ProgramHeader {
 	/// Defines the type for this segment.
 	pub program_type: ProgramType,
@@ -78,7 +84,7 @@ pub struct ProgramHeader {
 }
 
 /// Each section header describes a section of the ELF file.
-#[repr(packed)]
+#[repr(C, packed)]
 pub struct SectionHeader {
 	/// An offset into the string table, representing this section's name.
 	pub name_offset: u32,
@@ -105,10 +111,12 @@ pub struct SectionHeader {
 }
 
 /// The type of a program header in the ELF file.
+/// Because of the range of OS-Specific types, this enum cannot be loaded in directly from binary
 #[repr(u32)]
-#[derive(PartialEq, Eq, Clone, Debug)]
+#[derive(PartialEq, Eq, Clone, Debug, Copy, Default)]
 pub enum ProgramType {
 	/// An unused segment.
+	#[default]
 	Null = 0,
 	/// A loadable segment. These must be loaded into memory.
 	Load = 1,
@@ -125,6 +133,8 @@ pub enum ProgramType {
 	/// For thread-local storage.
 	ThreadLocal = 7,
 	// Others are OS/processor specific
+	OsSpecific,
+	ProcessorSpecific,
 }
 
 /// The type of a section header in the ELF file.
