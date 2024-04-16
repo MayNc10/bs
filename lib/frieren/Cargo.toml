@@ -2,3 +2,6 @@
 name = "frieren"
 version = "0.1.0"
 edition = "2021"
+
+[dev-dependencies]
+derivative = "2.2.0"
